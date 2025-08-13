@@ -1,4 +1,3 @@
-
 import os
 from datetime import datetime
 
@@ -95,8 +94,8 @@ def calcular(preco_bruto: float,
         "transporte": transporte,
         "custo_total": custo_total,
         "liquido": liquido,
-        "pct_frac": pct_frac,  # 0-1
-        "pct_percent": pct_frac * 100.0,  # 0-100
+        "pct_frac": pct_frac,       # 0-1
+        "pct_percent": pct_frac*100 # 0-100
     }
 
 def append_row(nome: str, estado: str, unidade: str, tipo_produto: str,
@@ -146,7 +145,7 @@ with aba_novo:
 
     with col_info:
         nome_orcamento = st.text_input("Nome do orçamento", value="", help="Identifique este orçamento para consultas futuras")
-        estado = st.selectbox("Estado", ESTADOS_BR, index=12)  # MG default (12)
+        estado = st.selectbox("Estado", ESTADOS_BR, index=12)  # MG como default (12)
         unidade = st.radio("Unidade", ["Tonelada", "m3"], horizontal=True, index=0)
         tipo_produto = st.selectbox("Tipo de produto (define imposto)", list(PRODUTOS_IMPOSTO.keys()), index=0)
 
@@ -191,7 +190,7 @@ with aba_novo:
                        km_total, preco_km, frete_fixo_unidade,
                        comissao_compra, comissao_venda)
             st.success("Orçamento salvo na tabela geral.")
-            st.experimental_rerun()
+            st.rerun()
 
 with aba_salvos:
     st.subheader("Orçamentos Salvos" )
@@ -243,7 +242,7 @@ with aba_salvos:
         if col_sel2.button("Excluir selecionado 🗑️"):
             delete_row(idx)
             st.success("Orçamento excluído.")
-            st.experimental_rerun()
+            st.rerun()
 
         st.markdown("### Editar orçamento")
         row = df.iloc[idx]
@@ -271,13 +270,14 @@ with aba_salvos:
                                km_edit, pk_edit, unidade_edit, frete_fix_edit,
                                comp_edit, vend_edit)
 
-            st.markdown("#### Pré‑visualização calculada (não editável)")
+            st.markdown("#### Pré-visualização calculada (não editável)")
             pr1, pr2, pr3, pr4 = st.columns(4)
             pr1.metric("Imposto (R$)", "{:.2f}".format(preview['imposto']))
             pr2.metric("Transporte (R$)", "{:.2f}".format(preview['transporte']))
             pr3.metric("Custo Total (R$)", "{:.2f}".format(preview['custo_total']))
             pr4.markdown("<div style='font-weight:700;'>% de Lucro:</div>"
-                         "<div style='font-size:1.4rem;color:{c};'>{v:.2f}%</div>".format(c=color_for_pct(preview['pct_percent']), v=preview['pct_percent']),
+                         "<div style='font-size:1.4rem;color:{c};'>{v:.2f}%</div>".format(
+                             c=color_for_pct(preview['pct_percent']), v=preview['pct_percent']),
                          unsafe_allow_html=True)
             st.metric("Líquido (R$)", "{:.2f}".format(preview['liquido']))
 
@@ -299,7 +299,7 @@ with aba_salvos:
             df.at[idx, "frete_fixo_unidade"] = float(frete_fix_edit)
             df.at[idx, "comissao_compra"] = float(comp_edit)
             df.at[idx, "comissao_venda"] = float(vend_edit)
-            # Derivados
+            # Derivados (recalculados)
             df.at[idx, "imposto"] = float(preview["imposto"])
             df.at[idx, "transporte"] = float(preview["transporte"])
             df.at[idx, "custo_total"] = float(preview["custo_total"])
@@ -307,4 +307,4 @@ with aba_salvos:
             df.at[idx, "%_lucro"] = float(preview["pct_frac"])  # fração 0-1
             save_table(df, CSV_PATH)
             st.success("Orçamento atualizado com sucesso!")
-            st.experimental_rerun()
+            st.rerun()
