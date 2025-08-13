@@ -36,6 +36,22 @@ def color_for_pct(pct_value_percent: float) -> str:
         return "orange"
     return "green"
 
+def style_pct_col(s: pd.Series):
+    """Aplica cor por célula conforme % (0–100) para a coluna '% de Lucro' na tabela."""
+    styles = []
+    for v in s:
+        try:
+            v = float(v)
+        except Exception:
+            v = 0.0
+        if v < 20:
+            styles.append("background-color:#ffd6d6; color:#b00000; font-weight:600")  # vermelho
+        elif v <= 30:
+            styles.append("background-color:#fff0cc; color:#8a6a00; font-weight:600")  # amarelo/laranja
+        else:
+            styles.append("background-color:#d9f7d9; color:#0f6e2d; font-weight:600")  # verde
+    return styles
+
 def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "data_hora",
@@ -228,7 +244,15 @@ with aba_salvos:
                       "Imposto (R$)","Transporte (R$)","Custo Total (R$)",
                       "Líquido (R$)","% de Lucro"]
         df_view = df_view[cols_order]
-        st.dataframe(df_view, use_container_width=True)
+
+        # >>> Colorir a coluna "% de Lucro" <<<
+        df_view["% de Lucro"] = pd.to_numeric(df_view["% de Lucro"], errors="coerce").fillna(0.0)
+        styled = df_view.style.apply(style_pct_col, subset=["% de Lucro"])
+
+        # Use st.dataframe(styled). Se sua versão não suportar estilo em dataframe,
+        # troque para st.table(styled).
+        st.dataframe(styled, use_container_width=True)
+        # st.table(styled)  # <- Se o estilo não aparecer, comente a linha de cima e use esta.
 
         st.markdown("---")
 
